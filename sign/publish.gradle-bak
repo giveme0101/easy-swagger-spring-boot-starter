@@ -1,0 +1,7 @@
+
+ext.'signing.keyId' = '指纹后8位'
+ext.'signing.password' = 'password'
+ext.'signing.secretKeyRingFile' = '../sign/secring.gpg'
+
+ext.'NEXUS_USERNAME' = '用户名'
+ext.'NEXUS_PASSWORD' = '密码'

@@ -1,0 +1,189 @@
+buildscript {
+    project.ext {
+
+        groupId = 'com.github.giveme0101'
+        artifactId = 'easy-swagger-spring-boot-starter'
+        version0 = '1.0.0'
+
+        author = 'giveme0101'
+        mail = 'xiajun94@FoxMail.com'
+
+        jvmVersion = '1.8'
+        lombokVersion = '1.18.8'
+        slf4jVersion = '1.7.26'
+        commonsLangVersion = '3.11'
+        springBootVersion = '2.1.5.RELEASE'
+        springCloudVersion = 'Greenwich.SR1'
+
+        springfoxVersion = '2.9.2'
+        swaggerAnnotationVersion = '1.5.20'
+        swaggerBootstrapUiVersion = '1.9.5'
+    }
+
+    repositories {
+        mavenLocal()
+        maven {
+            url "https://maven.aliyun.com/repository/public/"
+        }
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = jvmVersion
+    targetCompatibility = jvmVersion
+}
+
+apply plugin: 'idea'
+apply plugin: 'java-library'
+apply plugin: 'maven'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply from: './sign/publish.gradle'
+
+sourceCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://maven.aliyun.com/repository/public/"
+    }
+}
+
+dependencies {
+
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+
+    compile "io.springfox:springfox-swagger2:${springfoxVersion}"
+    compile "io.springfox:springfox-swagger-ui:${springfoxVersion}"
+    compile "com.github.xiaoymin:swagger-bootstrap-ui:${swaggerBootstrapUiVersion}"
+
+    implementation "org.springframework:spring-webmvc"
+    implementation "javax.servlet:javax.servlet-api"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.springframework.cloud:spring-cloud-context"
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getDefault())
+}
+
+jar {
+    enabled = true
+    archivesBaseName = "easy-swagger-spring-boot-starter"
+    manifest {
+        attributes 'Group-Id': "${project.groupId}"
+        attributes 'Artifact-Id': "${project.artifactId}"
+        attributes 'Version': "${project.version0}"
+        attributes 'Author': "${project.author}"
+        attributes 'Mail': "${project.mail}"
+        attributes 'Date': releaseTime()
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+    description = "打包源码"
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+javadoc {
+    options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+    options.author = true
+    options.version = true
+    options.header = project.name
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption("charset", "UTF-8")
+    logging.captureStandardError LogLevel.INFO
+    logging.captureStandardOutput LogLevel.INFO
+    options.encoding = "UTF-8"
+    options.charSet = 'UTF-8'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+
+            groupId = "${project.groupId}"
+            artifactId = "${project.artifactId}"
+            version = "${project.version0}"
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = "${artifactId}"
+                description = "easy swagger spring-boot starter"
+                url = "https://github.com/giveme0101/easy-swagger-spring-boot-starter"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        name = "${project.author}"
+                        email = "${project.mail}"
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/giveme0101/easy-swagger-spring-boot-starter.git"
+                    developerConnection = "scm:git:https://github.com/giveme0101/easy-swagger-spring-boot-starter.git"
+                    url = "https://github.com/giveme0101/easy-swagger-spring-boot-starter"
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            // 在对 task 中会生成对应的名称 publishMavenJavaPublicationToxxx
+            name 'centralMaven'
+            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = "${NEXUS_USERNAME}"
+                password = "${NEXUS_PASSWORD}"
+            }
+        }
+        maven {
+            name = 'centralMavenSnapshot'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots'
+            credentials {
+                username = "${NEXUS_USERNAME}"
+                password = "${NEXUS_PASSWORD}"
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
+    }
+
+}

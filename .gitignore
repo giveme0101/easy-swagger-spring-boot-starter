@@ -1,0 +1,28 @@
+#CJB
+/**/bin/
+/**/.classpath
+/**/.project
+/**/.settings
+/**/build/
+/**/out/
+.DS_Store
+.gradle
+gradle
+gradlew
+gradlew.*
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+.idea/
+
+sign/*.gpg
+sign/*.rev
+sign/publish.gradle
