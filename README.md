@@ -1,4 +1,5 @@
 
+```
 swagger:
   # 是否启用swagger
   enable: true
@@ -24,4 +25,5 @@ swagger:
         - name: secret
           param-type: header
         - name: tid
-          description: trace id   
+          description: trace id
+```
